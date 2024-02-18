@@ -217,7 +217,8 @@ class MangaTranslator():
             attempts += 1
         return False
 
-    async def _translate_file(self, path: str, dest: str, ctx: Context):
+    # translate single file
+    async def _translate_file(self, path: str, dest: str, ctx: Context) -> bool:
         if path.endswith('.txt'):
             with open(path, 'r') as f:
                 queries = f.read().split('\n')
@@ -267,6 +268,7 @@ class MangaTranslator():
                 return True
         return False
 
+    # translate a single image file
     async def translate(self, image: Image.Image, params: Union[dict, Context] = None) -> Context:
         """
         Translates a PIL image from a manga. Returns dict with result and intermediates of translation.
@@ -350,6 +352,7 @@ class MangaTranslator():
             except:
                 raise Exception(f'Invalid --font-color value: {ctx.font_color}. Use a hex value such as FF0000')
 
+    # do translate
     async def _translate(self, ctx: Context) -> Context:
 
         # -- Colorization
@@ -370,7 +373,7 @@ class MangaTranslator():
 
         ctx.img_rgb, ctx.img_alpha = load_image(ctx.upscaled)
 
-        # -- Detection
+        # -- Detection: populate ctx.textlines with text blocks
         await self._report_progress('detection')
         ctx.textlines, ctx.mask_raw, ctx.mask = await self._run_detection(ctx)
         if self.verbose:
@@ -387,7 +390,7 @@ class MangaTranslator():
                 cv2.polylines(img_bbox_raw, [txtln.pts], True, color=(255, 0, 0), thickness=2)
             cv2.imwrite(self._result_path('bboxes_unfiltered.png'), cv2.cvtColor(img_bbox_raw, cv2.COLOR_RGB2BGR))
 
-        # -- OCR
+        # -- OCR : fill ctx.textlines[number].text
         await self._report_progress('ocr')
         ctx.textlines = await self._run_ocr(ctx)
         if not ctx.textlines:
@@ -396,7 +399,7 @@ class MangaTranslator():
             ctx.result = ctx.upscaled
             return ctx
 
-        # -- Textline merge
+        # -- Textline merge: text_lines => text_regions
         await self._report_progress('textline_merge')
         ctx.text_regions = await self._run_textline_merge(ctx)
 
