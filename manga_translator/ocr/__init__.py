@@ -5,12 +5,14 @@ from .common import CommonOCR, OfflineOCR
 from .model_32px import Model32pxOCR
 from .model_48px import Model48pxOCR
 from .model_48px_ctc import Model48pxCTCOCR
+from .paid_ocr import PaidOCR
 from ..utils import Quadrilateral
 
 OCRS = {
     '32px': Model32pxOCR,
     '48px': Model48pxOCR,
     '48px_ctc': Model48pxCTCOCR,
+    'paid': PaidOCR,
 }
 ocr_cache = {}
 
