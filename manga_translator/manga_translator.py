@@ -102,20 +102,20 @@ class MangaTranslator():
         self._gpu_limited_memory = params.get('use_gpu_limited', False)
         if self._gpu_limited_memory and not self.using_gpu:
             self.device = device
-        if self.using_gpu and ( not torch.cuda.is_available() and not torch.backends.mps.is_available()):
+        if self.using_gpu and (not torch.cuda.is_available() and not torch.backends.mps.is_available()):
             raise Exception(
-                'CUDA or Metal compatible device could not be found in torch whilst --use-gpu args was set.\n' \
+                'CUDA or Metal compatible device could not be found in torch whilst --use-gpu args was set.\n'
                 'Is the correct pytorch version installed? (See https://pytorch.org/)')
         if params.get('model_dir'):
             ModelWrapper._MODEL_DIR = params.get('model_dir')
-        self.kernel_size=int(params.get('kernel_size'))
+        self.kernel_size = int(params.get('kernel_size'))
         os.environ['INPAINTING_PRECISION'] = params.get('inpainting_precision', 'fp32')
 
     @property
     def using_gpu(self):
         return self.device.startswith('cuda') or self.device == 'mps'
 
-    async def translate_path(self, path: str, dest: str = None, params: dict = None):
+    async def translate_path(self, path: str, dest: str = None, params: dict[str, Union[int, str]] = None):
         """
         Translates an image or folder (recursively) specified through the path.
         """
@@ -408,7 +408,6 @@ class MangaTranslator():
         await self._report_progress('translating')
         ctx.text_regions = await self._run_text_translation(ctx)
         await self._report_progress('after-translating')
-
 
         if not ctx.text_regions:
             await self._report_progress('error-translating', True)
