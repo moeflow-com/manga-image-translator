@@ -45,3 +45,4 @@ arabic-reshaper
 pyhyphen
 langcodes
 pydensecrf@git+https://github.com/RogerQi/pydensecrf.git
+manga-ocr
