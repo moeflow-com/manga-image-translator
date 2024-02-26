@@ -76,7 +76,7 @@ class TranslationInterrupt(Exception):
     pass
 
 
-class MangaTranslator():
+class MangaTranslator():  # where the uesful stuff is
 
     def __init__(self, params: dict = None):
         self._progress_hooks = []
@@ -636,7 +636,7 @@ class MangaTranslator():
             f.write(s)
 
 
-class MangaTranslatorWeb(MangaTranslator):
+class MangaTranslatorWeb(MangaTranslator):  # run as translation microservice
     """
     Translator client that executes tasks on behalf of the webserver in web_main.py.
     """

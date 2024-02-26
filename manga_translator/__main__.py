@@ -41,12 +41,12 @@ async def dispatch(args: Namespace):
             for path in natural_sort(args.input):
                 await translator.translate_path(path, dest, args_dict)
 
-    elif args.mode == 'web':
+    elif args.mode == 'web':  # a server for TEXT translation? WTF
         from .server.web_main import dispatch
         await dispatch(args.host, args.port, translation_params=args_dict)
 
     elif args.mode == 'web_client':
-        translator = MangaTranslatorWeb(args_dict)
+        translator = MangaTranslatorWeb(args_dict)  # a microservice for TEXT translation WTF
         await translator.listen(args_dict)
 
     elif args.mode == 'ws':
