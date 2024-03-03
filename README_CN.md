@@ -66,6 +66,7 @@ $ pip install git+https://github.com/kodalli/pydensecrf.git
 | gpt3.5         | ✔️      |         | Implements gpt-3.5-turbo. Requires `OPENAI_API_KEY`   |
 | gpt4           | ✔️      |         | Implements gpt-4. Requires `OPENAI_API_KEY`           |
 | papago         |         |         |                                                       |
+| sakura         |         |         |需要`SAKURA_API_BASE`|
 | offline        |         | ✔️      |  自动选择可用的离线模型，只是选择器                                                  |
 | sugoi          |         | ✔️      |  只能翻译英文                                                    |
 | m2m100         |         | ✔️      |  可以翻译所有语言                                                     |
@@ -140,7 +141,7 @@ IND: Indonesian
 --upscale-ratio UPSCALE_RATIO                Image upscale ratio applied before detection. Can
                                              improve text detection.
 --colorizer {mc2}                            Colorization model to use.
---translator {google,youdao,baidu,deepl,papago,caiyun,gpt3,gpt3.5,gpt4,none,original,offline,nllb,nllb_big,sugoi,jparacrawl,jparacrawl_big,m2m100,m2m100_big}
+--translator {google,youdao,baidu,deepl,papago,caiyun,gpt3,gpt3.5,gpt4,none,original,offline,nllb,nllb_big,sugoi,jparacrawl,jparacrawl_big,m2m100,sakura}
                                              Language translator to use
 --translator-chain TRANSLATOR_CHAIN          Output of one translator goes in another. Example:
                                              --translator-chain "google:JPN;sugoi:ENG".

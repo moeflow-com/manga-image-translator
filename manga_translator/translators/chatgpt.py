@@ -10,7 +10,6 @@ from typing import List, Dict
 
 from .common import CommonTranslator, MissingAPIKeyException
 from .keys import OPENAI_API_KEY, OPENAI_HTTP_PROXY, OPENAI_API_BASE
-
 CONFIG = None
 
 class GPT3Translator(CommonTranslator):
@@ -54,11 +53,11 @@ class GPT3Translator(CommonTranslator):
     _INCLUDE_TEMPLATE = True
     _PROMPT_TEMPLATE = 'Please help me to translate the following text from a manga to {to_lang} (if it\'s already in {to_lang} or looks like gibberish you have to output it as it is instead):\n'
 
-    def __init__(self):
+    def __init__(self, check_openai_key = True):
         super().__init__()
         openai.api_key = openai.api_key or OPENAI_API_KEY
         openai.api_base = OPENAI_API_BASE
-        if not openai.api_key:
+        if not openai.api_key and check_openai_key:
             raise MissingAPIKeyException('Please set the OPENAI_API_KEY environment variable before using the chatgpt translator.')
         if OPENAI_HTTP_PROXY:
             proxies = {
