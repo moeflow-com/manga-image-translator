@@ -59,6 +59,8 @@ aiofiles = "^23.2.1"
 arabic-reshaper = "^3.0.0"
 pyhyphen = "^4.0.3"
 pydensecrf = { git = "https://github.com/kodalli/pydensecrf.git" }
+celery = "5.3.6"
+pymongo = "3.13.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.25.2"
