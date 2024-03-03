@@ -15,8 +15,8 @@ build-backend = "poetry.core.masonry.api"
 python = ">=3.10, <3.13"
 langcodes = "^3.3.0"
 networkx = "^3.1"
-torch = "^2.0.1"
-torchvision = "^0.15.2"
+torch = {version = "^2.0.1", source = "pytorch-gpu-src"}
+torchvision = {version = "^0.15.2", source = "pytorch-gpu-src"}
 torch-summary = "^1.4.5"
 einops = "^0.6.1"
 scikit-image = "^0.21.0"
@@ -95,6 +95,6 @@ minversion = "6.0"
 testpaths = ["test"]
 
 [[tool.poetry.source]]
-name = "pytorch-rocm"
+name = "pytorch-gpu-src"
 url = "https://download.pytorch.org/whl/rocm5.7"
-priority = "primary"
+priority = "explicit"
