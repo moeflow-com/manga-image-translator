@@ -65,7 +65,8 @@ class Context(dict):
 
 # TODO: Add TranslationContext for type linting
 
-def atoi(text):
+
+def atoi(text: str) -> int | str:
     return int(text) if text.isdigit() else text
 
 def natural_sort(l: List[str]):

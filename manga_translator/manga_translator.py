@@ -180,6 +180,7 @@ class MangaTranslator():  # where the uesful stuff is
             else:
                 logger.info(f'Done. Translated {translated_count} image{"" if translated_count == 1 else "s"}')
 
+    # translate a single file, with error handling
     async def translate_file(self, path: str, dest: str, params: dict):
         if not params.get('overwrite') and os.path.exists(dest):
             logger.info(
@@ -217,7 +218,7 @@ class MangaTranslator():  # where the uesful stuff is
             attempts += 1
         return False
 
-    # translate single file
+    # the hard lifting
     async def _translate_file(self, path: str, dest: str, ctx: Context) -> bool:
         if path.endswith('.txt'):
             with open(path, 'r') as f:
@@ -1264,26 +1265,38 @@ class MangaTranslatorAPI(MangaTranslator):
         return web.json_response({'details': results, 'img': img})
 
     class PostSchema(Schema):
-        target_language = fields.Str(required=False, validate=lambda a: a.upper() in VALID_LANGUAGES)
+        # common?
+        # verbose: boolean
+
+        # detector stage
         detector = fields.Str(required=False, validate=lambda a: a.lower() in DETECTORS)
-        ocr = fields.Str(required=False, validate=lambda a: a.lower() in OCRS)
-        inpainter = fields.Str(required=False, validate=lambda a: a.lower() in INPAINTERS)
-        upscaler = fields.Str(required=False, validate=lambda a: a.lower() in UPSCALERS)
-        translator = fields.Str(required=False, validate=lambda a: a.lower() in TRANSLATORS)
-        direction = fields.Str(required=False, validate=lambda a: a.lower() in {'auto', 'h', 'v'})
-        upscale_ratio = fields.Integer(required=False)
-        translator_chain = fields.Str(required=False)
-        selective_translation = fields.Str(required=False)
-        attempts = fields.Integer(required=False)
         detection_size = fields.Integer(required=False)
         text_threshold = fields.Float(required=False)
         box_threshold = fields.Float(required=False)
         unclip_ratio = fields.Float(required=False)
-        inpainting_size = fields.Integer(required=False)
+        det_gamma_correct = fields.Bool(required=False)
+        det_invert = fields.Bool(required=False)
         det_rotate = fields.Bool(required=False)
         det_auto_rotate = fields.Bool(required=False)
-        det_invert = fields.Bool(required=False)
-        det_gamma_correct = fields.Bool(required=False)
+
+        # translation
+        target_language = fields.Str(required=False, validate=lambda a: a.upper() in VALID_LANGUAGES)
+
+        # OCR
+        ocr = fields.Str(required=False, validate=lambda a: a.lower() in OCRS)
+
+        translator = fields.Str(required=False, validate=lambda a: a.lower() in TRANSLATORS)
+        # inpaint
+        inpainter = fields.Str(required=False, validate=lambda a: a.lower() in INPAINTERS)
+
+        # upscale (optional)
+        upscaler = fields.Str(required=False, validate=lambda a: a.lower() in UPSCALERS)
+        upscale_ratio = fields.Integer(required=False)
+        direction = fields.Str(required=False, validate=lambda a: a.lower() in {'auto', 'h', 'v'})
+        translator_chain = fields.Str(required=False)
+        selective_translation = fields.Str(required=False)
+        attempts = fields.Integer(required=False)
+        inpainting_size = fields.Integer(required=False)
         min_text_length = fields.Integer(required=False)
         colorization_size = fields.Integer(required=False)
         denoise_sigma = fields.Integer(required=False)

@@ -7,6 +7,7 @@ import itertools
 
 from ..utils import InfererModule, TextBlock, ModelWrapper, Quadrilateral
 
+
 class CommonOCR(InfererModule):
     def _generate_text_direction(self, bboxes: List[Union[Quadrilateral, TextBlock]]):
         if len(bboxes) > 0:
@@ -19,7 +20,7 @@ class CommonOCR(InfererModule):
 
                 G = nx.Graph()
                 for i, box in enumerate(bboxes):
-                    G.add_node(i, box = box)
+                    G.add_node(i, box=box)
                 for ((u, ubox), (v, vbox)) in itertools.combinations(enumerate(bboxes), 2):
                     if quadrilateral_can_merge_region(ubox, vbox, aspect_ratio_tol=1):
                         G.add_edge(u, v)
@@ -30,9 +31,9 @@ class CommonOCR(InfererModule):
                     majority_dir = Counter(dirs).most_common(1)[0][0]
                     # sort
                     if majority_dir == 'h':
-                        nodes = sorted(nodes, key = lambda x: bboxes[x].aabb.y + bboxes[x].aabb.h // 2)
+                        nodes = sorted(nodes, key=lambda x: bboxes[x].aabb.y + bboxes[x].aabb.h // 2)
                     elif majority_dir == 'v':
-                        nodes = sorted(nodes, key = lambda x: -(bboxes[x].aabb.x + bboxes[x].aabb.w))
+                        nodes = sorted(nodes, key=lambda x: -(bboxes[x].aabb.x + bboxes[x].aabb.w))
                     # yield overall bbox and sorted indices
                     for node in nodes:
                         yield bboxes[node], majority_dir
