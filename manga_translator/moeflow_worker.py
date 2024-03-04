@@ -1,7 +1,13 @@
 # consume tasks from moeflow job worker with manga-image-translator code
 from celery import Celery
-from manga_translator import MangaTranslator
 from asgiref.sync import async_to_sync
+import manga_translator.detection as detection
+import manga_translator.ocr as ocr
+import manga_translator.translators as translator
+
+from .detection import DETECTORS, dispatch as dispatch_detection, prepare as prepare_detection
+from .ocr import OCRS, dispatch as dispatch_ocr, prepare as prepare_ocr
+from .textline_merge import dispatch as dispatch_textline_merge
 
 env = {
     "RABBITMQ_USER": 'moeflow',
@@ -29,12 +35,28 @@ def add(x, y):
 
 
 @celery_app.task
-def translate(image_path: str, dest: str, args_dict: dict):
+def detect_textblocks(image_path: str, args=None):
     detector_args = {
         'detector': 'default',  # see detecton/__init__.py
         # 'img_rgb': from image
-        # 'detect_size': 48,
+        **(args or {})
     }
+
+
+@async_to_sync
+async def do_detect(image_path: str, args: dict):
+    await detection.prepare(args['detector'])
+    result = await detection.dispatch(image_path, **args)
+    return {}
+
+
+@celery_app.task
+def translate(blocks: list[object], args: dict):
+    pass
+
+
+async def do_translate(image_path: str, dest: str, args_dict: dict):
+    await translator.prepare(args['translator'])
 
     ocr_dict = {
         'ocr': '48px',  # reportedly to work best
@@ -43,10 +65,6 @@ def translate(image_path: str, dest: str, args_dict: dict):
     }
 
     translate_dict = {
-
-    }
-
-    inpaint_dict = {
 
     }
 
