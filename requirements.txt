@@ -44,5 +44,6 @@ aiofiles
 arabic-reshaper
 pyhyphen
 langcodes
-pydensecrf@git+https://github.com/RogerQi/pydensecrf.git
+pydensecrf@git+https://github.com/lucasb-eyer/pydensecrf.git
 manga-ocr
+httpcore==0.9.*

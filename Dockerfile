@@ -6,7 +6,7 @@ RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
 # Assume root to install required dependencies
 RUN apt-get install -y git g++ ffmpeg libsm6 libxext6 libvulkan-dev && \
-    pip install git+https://github.com/kodalli/pydensecrf.git
+    pip install potery==1.6.1
 
 # Install pip dependencies
 
