@@ -1,13 +1,22 @@
 # consume tasks from moeflow job worker with manga-image-translator code
+import re
+
 from celery import Celery
 from asgiref.sync import async_to_sync
 import manga_translator.detection as detection
 import manga_translator.ocr as ocr
 import manga_translator.translators as translator
+import manga_translator.utils.generic as utils_generic
+import manga_translator.utils as utils
 
-from .detection import DETECTORS, dispatch as dispatch_detection, prepare as prepare_detection
-from .ocr import OCRS, dispatch as dispatch_ocr, prepare as prepare_ocr
-from .textline_merge import dispatch as dispatch_textline_merge
+import logging
+import json
+
+from PIL import Image
+import numpy as np
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 env = {
     "RABBITMQ_USER": 'moeflow',
@@ -17,7 +26,6 @@ env = {
     'MONGODB_PASS': 'PLEASE_CHANGE_THIS',
     'MONGODB_DB_NAME': 'moeflow',
 }
-
 
 celery_app = Celery(
     "manga-image-translator-moeflow-worker",
@@ -29,9 +37,54 @@ celery_app = Celery(
     })
 
 
-@celery_app.task
-def add(x, y):
-    return x + y
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, utils_generic.Quadrilateral):
+            return {
+                'pts': o.pts,
+                'text': o.text,
+                'prob': o.prob,
+                'textlines': list(map(self.default, o.textlines)),
+            }
+        elif isinstance(o, np.ndarray):
+            return o.tolist()
+        elif isinstance(o, np.integer):
+            return int(o)
+        elif isinstance(o, np.floating):
+            return float(o)
+        super().default(o)
+
+
+@celery_app.task(name="tasks.mit_detection")
+def run_detection(path_or_url: str, **kwargs):
+    logger.debug("Running text segmentation %s %s", path_or_url, kwargs)
+    result = async_detection(path_or_url, **kwargs)
+    logger.debug("Running text segmentation result = %o", result)
+    return result
+
+
+def load_rgb_image(path_or_url: str) -> np.ndarray:
+    if re.match(r'^https?://', path_or_url):
+        raise NotImplemented("URL not supported yet")
+    img = Image.open(path_or_url)
+    img_rgb, img_alpha = utils_generic.load_image(img)
+    return img_rgb
+
+
+@async_to_sync
+async def async_detection(path_or_url: str, **kwargs: str):
+    await detection.prepare(kwargs['detector_key'])
+    img = load_rgb_image(path_or_url)
+    text_lines, mask_raw, mask = await detection.dispatch(
+        image=img,
+        # detector_key=kwargs['detector_key'],
+        **kwargs,
+    )
+    return {
+        'text_lines': json.loads(json.dumps(text_lines, cls=JSONEncoder)),
+        # 'mask_raw': mask_raw,
+        # 'mask': mask,
+    }
 
 
 @celery_app.task
@@ -43,20 +96,13 @@ def detect_textblocks(image_path: str, args=None):
     }
 
 
-@async_to_sync
-async def do_detect(image_path: str, args: dict):
-    await detection.prepare(args['detector'])
-    result = await detection.dispatch(image_path, **args)
-    return {}
-
-
 @celery_app.task
 def translate(blocks: list[object], args: dict):
     pass
 
 
 async def do_translate(image_path: str, dest: str, args_dict: dict):
-    await translator.prepare(args['translator'])
+    await translator.prepare(args_dict['translator'])
 
     ocr_dict = {
         'ocr': '48px',  # reportedly to work best
