@@ -13,7 +13,6 @@ OCRS = {
     '32px': Model32pxOCR,
     '48px': Model48pxOCR,
     '48px_ctc': Model48pxCTCOCR,
-    'paid': PaidOCR,
     'mocr': ModelMangaOCR,
 }
 ocr_cache = {}

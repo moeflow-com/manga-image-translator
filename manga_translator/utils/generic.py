@@ -41,7 +41,7 @@ class Context(dict):
 
     def __contains__(self, key):
         return key in self.keys()
-    
+
     def __repr__(self):
         type_name = type(self).__name__
         arg_strings = []
@@ -155,7 +155,7 @@ def chunks(lst, n):
 
 def get_digest(file_path: str) -> str:
     h = hashlib.sha256()
-    BUF_SIZE = 65536 
+    BUF_SIZE = 65536
 
     with open(file_path, 'rb') as file:
         while True:
@@ -247,7 +247,7 @@ class AvgMeter():
         else:
             return 0
 
-def load_image(img: Image.Image):
+def load_image(img: Image.Image) -> Tuple[np.ndarray, any]:
     if img.mode == 'RGBA':
         # from https://stackoverflow.com/questions/9166400/convert-rgba-png-to-rgb-with-pil
         img.load()  # needed for split()
@@ -847,7 +847,7 @@ def color_difference(rgb1: List, rgb2: List) -> float:
     color2 = np.array(rgb2, dtype=np.uint8).reshape(1, 1, 3)
     diff = cv2.cvtColor(color1, cv2.COLOR_RGB2LAB).astype(np.float32) - cv2.cvtColor(color2, cv2.COLOR_RGB2LAB).astype(np.float32)
     diff[..., 0] *= 0.392
-    diff = np.linalg.norm(diff, axis=2) 
+    diff = np.linalg.norm(diff, axis=2)
     return diff.item()
 
 def rgb2hex(r,g,b):
@@ -872,7 +872,7 @@ def get_color_name(rgb: List[int]) -> str:
 def square_pad_resize(img: np.ndarray, tgt_size: int):
     h, w = img.shape[:2]
     pad_h, pad_w = 0, 0
-    
+
     # make square image
     if w < h:
         pad_w = h - w
@@ -886,7 +886,7 @@ def square_pad_resize(img: np.ndarray, tgt_size: int):
         pad_h += pad_size
         pad_w += pad_size
 
-    if pad_h > 0 or pad_w > 0:    
+    if pad_h > 0 or pad_w > 0:
         img = cv2.copyMakeBorder(img, 0, pad_h, 0, pad_w, cv2.BORDER_CONSTANT)
 
     down_scale_ratio = tgt_size / img.shape[0]
@@ -897,10 +897,10 @@ def square_pad_resize(img: np.ndarray, tgt_size: int):
     return img, down_scale_ratio, pad_h, pad_w
 
 def det_rearrange_forward(
-    img: np.ndarray, 
-    dbnet_batch_forward: Callable[[np.ndarray, str], Tuple[np.ndarray, np.ndarray]], 
-    tgt_size: int = 1280, 
-    max_batch_size: int = 4, 
+    img: np.ndarray,
+    dbnet_batch_forward: Callable[[np.ndarray, str], Tuple[np.ndarray, np.ndarray]],
+    tgt_size: int = 1280,
+    max_batch_size: int = 4,
     device='cuda', verbose=False):
     '''
     Rearrange image to square batches before feeding into network if following conditions are satisfied: \n
@@ -945,7 +945,7 @@ def det_rearrange_forward(
             patch_lst = einops.rearrange(patch_lst, '(p_num pw_num) ph pw c -> p_num (pw_num pw) ph c', p_num=p_num)
         else:
             patch_lst = einops.rearrange(patch_lst, '(p_num pw_num) ph pw c -> p_num ph (pw_num pw) c', p_num=p_num)
-        
+
         batches = [[]]
         for ii, patch in enumerate(patch_lst):
 
@@ -980,7 +980,7 @@ def det_rearrange_forward(
 
     if transpose:
         img = einops.rearrange(img, 'h w c -> w h c')
-    
+
     pw_num = max(int(np.floor(2 * tgt_size / w)), 2)
     patch_size = ph = pw_num * w
 
