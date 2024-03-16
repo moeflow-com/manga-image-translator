@@ -1,11 +1,12 @@
 # consume tasks from moeflow job worker with manga-image-translator code
 import re
+from typing import Any, Awaitable
 
 from celery import Celery
 from asgiref.sync import async_to_sync
 import manga_translator.detection as detection
 import manga_translator.ocr as ocr
-import manga_translator.translators as translator
+import manga_translator.translators as translators
 import manga_translator.utils.generic as utils_generic
 import manga_translator.utils as utils
 
@@ -67,18 +68,22 @@ def mit_detect_text(path_or_url: str, **kwargs):
 @celery_app.task(name='tasks.mit.ocr')
 def mit_ocr(path_or_url: str, **kwargs):
     logger.debug("Running OCR %s %s", path_or_url, kwargs)
-    result = async_ocr(path_or_url, **kwargs)
-    logger.debug("Running OCR result = %o", result)
+    # for unknown reason async_ocr returns [[Quad]] instead of [result]
+    result, = async_ocr(path_or_url, **kwargs)
+    logger.debug("Running OCR result = %s", result)
     return result
 
 
-@celery_app.task(name='tasks.mit_translate')
-def mit_translate(path_or_url: str, **kwargs):
-    pass
+@celery_app.task(name='tasks.mit.translate')
+def mit_translate(**kwargs):
+    logger.debug("Running translate %s %s", kwargs)
+    result = async_translate(**kwargs)
+    logger.debug("Running translate result = %s", result)
+    return result
 
 
 @celery_app.task(name='tasks.mit.inpaint')
-def mit_translate(path_or_url: str, **kwargs):
+def mit_inpaint(path_or_url: str, **kwargs):
     pass
 
 
@@ -139,30 +144,16 @@ async def async_ocr(path_or_url: str, **kwargs):
 
 
 @async_to_sync
-async def async_translate(image_path: str, dest: str, args_dict: dict):
-    ocr_dict = {
-        'ocr': '48px',  # reportedly to work best
-        # textlines: from detector
-        # TODO more
-    }
-
-    translate_dict = {
-
-    }
-
-    ctx_dict = {
-        # **args_dict,
-        # upscale_ratio
-        **detector_args,
-        **ocr_dict,
-        **translate_dict,
-        **ocr_dict
-    }
-    return do_translate(image_path, dest, ctx_dict)
-
-
-@async_to_sync
-async def do_translate(image_path: str, dest_image_path: str, args_dict: dict):
-    translator = MangaTranslator()
-
-    await translator.translate_file(image_path, dest_image_path, args_dict)
+async def async_translate(**kwargs) -> Awaitable[list[str]]:
+    query = kwargs['query']
+    target_lang = kwargs['target_lang']
+    translator = translators.get_translator(kwargs['translator'])
+    if isinstance(translator, translators.OfflineTranslator):
+        await translator.download()
+        await translator.load('auto', target_lang, device='cpu')
+    result = await translator.translate(
+        from_lang='auto',
+        to_lang=target_lang,
+        queries=[query],
+    )
+    return result
