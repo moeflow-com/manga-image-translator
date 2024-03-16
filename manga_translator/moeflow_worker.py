@@ -60,7 +60,7 @@ class JSONEncoder(json.JSONEncoder):
 def mit_detect_text(path_or_url: str, **kwargs):
     logger.debug("Running text segmentation %s %s", path_or_url, kwargs)
     result = async_detection(path_or_url, **kwargs)
-    logger.debug("Running text segmentation result = %o", result)
+    logger.debug("Running text segmentation result = %s", result)
     return result
 
 
