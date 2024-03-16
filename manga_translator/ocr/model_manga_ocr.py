@@ -76,7 +76,7 @@ async def merge_bboxes(bboxes: List[Quadrilateral], width: int, height: int):
         # yield overall bbox and sorted indices
         merge_box.append(txtlns)
         merge_idx.append(nodes)
-    
+
     return_box = []
     for bbox in merge_box:
         if len(bbox) == 1:
@@ -132,7 +132,7 @@ class ModelMangaOCR(OfflineOCR):
     async def _unload(self):
         del self.model
         del self.mocr
-    
+
     async def _infer(self, image: np.ndarray, textlines: List[Quadrilateral], args: dict, verbose: bool = False, ignore_bubble: int = 0) -> List[TextBlock]:
         text_height = 48
         max_chunk_size = 16
@@ -145,9 +145,9 @@ class ModelMangaOCR(OfflineOCR):
         if len(quadrilaterals) > 0 and isinstance(quadrilaterals[0][0], Quadrilateral):
             perm = sorted(range(len(region_imgs)), key = lambda x: region_imgs[x].shape[1])
             is_quadrilaterals = True
-        
+
         texts = {}
-        if args['use_mocr_merge']:
+        if args.get('use_mocr_merge', False):
             merged_textlines, merged_idx = await merge_bboxes(textlines, image.shape[1], image.shape[0])
             merged_quadrilaterals = list(self._generate_text_direction(merged_textlines))
         else:
@@ -164,7 +164,7 @@ class ModelMangaOCR(OfflineOCR):
             merged_region_imgs.append(q.get_transformed_region(image, merged_d, merged_text_height))
         for idx in range(len(merged_region_imgs)):
             texts[idx] = self.mocr(Image.fromarray(merged_region_imgs[idx]))
-            
+
         ix = 0
         out_regions = {}
         for indices in chunks(perm, max_chunk_size):
@@ -239,7 +239,7 @@ class ModelMangaOCR(OfflineOCR):
                     cur_region.update_font_colors(np.array([fr, fg, fb]), np.array([br, bg, bb]))
 
                 out_regions[idx_keys[i]] = cur_region
-                
+
         output_regions = []
         for i, nodes in enumerate(merged_idx):
             total_logprobs = 0
@@ -250,11 +250,11 @@ class ModelMangaOCR(OfflineOCR):
             bg_r = []
             bg_g = []
             bg_b = []
-            
+
             for idx in nodes:
                 if idx not in out_regions:
                     continue
-                    
+
                 total_logprobs += np.log(out_regions[idx].prob) * out_regions[idx].area
                 total_area += out_regions[idx].area
                 fg_r.append(out_regions[idx].fg_r)
@@ -263,7 +263,7 @@ class ModelMangaOCR(OfflineOCR):
                 bg_r.append(out_regions[idx].bg_r)
                 bg_g.append(out_regions[idx].bg_g)
                 bg_b.append(out_regions[idx].bg_b)
-                
+
             total_logprobs /= total_area
             prob = np.exp(total_logprobs)
             fr = round(np.mean(fg_r))
@@ -272,7 +272,7 @@ class ModelMangaOCR(OfflineOCR):
             br = round(np.mean(bg_r))
             bg = round(np.mean(bg_g))
             bb = round(np.mean(bg_b))
-            
+
             txt = texts[i]
             self.logger.info(f'prob: {prob} {txt} fg: ({fr}, {fg}, {fb}) bg: ({br}, {bg}, {bb})')
             cur_region = merged_quadrilaterals[i][0]

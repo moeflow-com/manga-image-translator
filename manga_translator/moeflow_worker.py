@@ -127,13 +127,15 @@ async def async_detection(path_or_url: str, **kwargs: str):
 async def async_ocr(path_or_url: str, **kwargs):
     await ocr.prepare(kwargs['ocr_key'])
     img = load_rgb_image(path_or_url)
-    kwargs['textlines'] = deserialize_quad_list(kwargs['textlines'])
-
+    regions = deserialize_quad_list(kwargs['regions'])
     result = await ocr.dispatch(
+        ocr_key=kwargs['ocr_key'],
         image=img,
-        **kwargs
+        regions=regions,
+        args=kwargs,
+        verbose=kwargs.get('verbose', False),
     )
-    return result
+    return json.loads(json.dumps(result, cls=JSONEncoder)),
 
 
 @async_to_sync
