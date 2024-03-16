@@ -55,12 +55,31 @@ class JSONEncoder(json.JSONEncoder):
         super().default(o)
 
 
-@celery_app.task(name="tasks.mit_detection")
-def run_detection(path_or_url: str, **kwargs):
+@celery_app.task(name="tasks.mit.detect_text")
+def mit_detect_text(path_or_url: str, **kwargs):
     logger.debug("Running text segmentation %s %s", path_or_url, kwargs)
     result = async_detection(path_or_url, **kwargs)
     logger.debug("Running text segmentation result = %o", result)
     return result
+
+
+# OCR + detect_textblocks
+@celery_app.task(name='tasks.mit.ocr')
+def mit_ocr(path_or_url: str, **kwargs):
+    logger.debug("Running OCR %s %s", path_or_url, kwargs)
+    result = async_ocr(path_or_url, **kwargs)
+    logger.debug("Running OCR result = %o", result)
+    return result
+
+
+@celery_app.task(name='tasks.mit_translate')
+def mit_translate(path_or_url: str, **kwargs):
+    pass
+
+
+@celery_app.task(name='tasks.mit.inpaint')
+def mit_translate(path_or_url: str, **kwargs):
+    pass
 
 
 def load_rgb_image(path_or_url: str) -> np.ndarray:
@@ -87,23 +106,20 @@ async def async_detection(path_or_url: str, **kwargs: str):
     }
 
 
-@celery_app.task
-def detect_textblocks(image_path: str, args=None):
-    detector_args = {
-        'detector': 'default',  # see detecton/__init__.py
-        # 'img_rgb': from image
-        **(args or {})
-    }
+@async_to_sync
+async def async_ocr(path_or_url: str, **kwargs):
+    await ocr.prepare(kwargs['ocr_key'])
+    img = load_rgb_image(path_or_url)
+
+    result = await ocr.dispatch(
+        image=img,
+        **kwargs
+    )
+    return result
 
 
-@celery_app.task
-def translate(blocks: list[object], args: dict):
-    pass
-
-
-async def do_translate(image_path: str, dest: str, args_dict: dict):
-    await translator.prepare(args_dict['translator'])
-
+@async_to_sync
+async def async_translate(image_path: str, dest: str, args_dict: dict):
     ocr_dict = {
         'ocr': '48px',  # reportedly to work best
         # textlines: from detector
