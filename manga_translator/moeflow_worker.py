@@ -90,17 +90,34 @@ def load_rgb_image(path_or_url: str) -> np.ndarray:
     return img_rgb
 
 
+def deserialize_quad_list(text_lines: list[dict]) -> list[utils_generic.Quadrilateral]:
+    def create(json_value: dict) -> utils_generic.Quadrilateral:
+        optional_args = {
+            k: json_value[k]
+            for k in ['fg_r', 'fg_g', 'fg_b', 'bg_r', 'bg_g', 'bg_b']
+            if k in json_value
+        }
+        return utils_generic.Quadrilateral(
+            pts=np.array(json_value['pts']),
+            text=json_value['text'],
+            prob=json_value['prob'],
+            **optional_args
+        )
+
+    return list(map(create, text_lines))
+
+
 @async_to_sync
 async def async_detection(path_or_url: str, **kwargs: str):
     await detection.prepare(kwargs['detector_key'])
     img = load_rgb_image(path_or_url)
-    text_lines, mask_raw, mask = await detection.dispatch(
+    textlines, mask_raw, mask = await detection.dispatch(
         image=img,
         # detector_key=kwargs['detector_key'],
         **kwargs,
     )
     return {
-        'text_lines': json.loads(json.dumps(text_lines, cls=JSONEncoder)),
+        'textlines': json.loads(json.dumps(textlines, cls=JSONEncoder)),
         # 'mask_raw': mask_raw,
         # 'mask': mask,
     }
@@ -110,6 +127,7 @@ async def async_detection(path_or_url: str, **kwargs: str):
 async def async_ocr(path_or_url: str, **kwargs):
     await ocr.prepare(kwargs['ocr_key'])
     img = load_rgb_image(path_or_url)
+    kwargs['textlines'] = deserialize_quad_list(kwargs['textlines'])
 
     result = await ocr.dispatch(
         image=img,
