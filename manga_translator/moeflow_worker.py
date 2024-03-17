@@ -76,7 +76,7 @@ def mit_ocr(path_or_url: str, **kwargs):
 
 @celery_app.task(name='tasks.mit.translate')
 def mit_translate(**kwargs):
-    logger.debug("Running translate %s %s", kwargs)
+    logger.debug("Running translate %s", kwargs)
     result = async_translate(**kwargs)
     logger.debug("Running translate result = %s", result)
     return result
