@@ -1,0 +1,1 @@
+../../manga_translator/__main__.py
