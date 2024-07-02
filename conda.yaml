@@ -120,6 +120,7 @@ dependencies:
     - python-dotenv
     - py3langid
     - timm
+    - streamlit==1.36.0
     - redis
     - manga-ocr
     - pymongo
