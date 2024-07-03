@@ -3,8 +3,9 @@
 default:
 	@echo Please use other targets
 
-conda-env:
+venv: conda.yaml
 	micromamba env create --file conda.yaml
+	micromamba run -n mit-py311 python3 -mvenv --system-site-packages ./venv
 
 run-worker:
 	micromamba run -n mit-py311 celery --app moeflow_worker worker --queues mit --loglevel=debug --concurrency=1
@@ -13,7 +14,7 @@ run-streamlit:
 	micromamba run -n mit-py311 streamlit run streamlit_main.py
 
 prepare-models:
-	micromamba run -n mit-py311 --no-capture-output python3 docker_prepare.py
+	micromamba run -n mit-py311 python3 docker_prepare.py
 
 build-image:
 	docker rmi manga-image-translator || true
