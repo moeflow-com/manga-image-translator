@@ -4,13 +4,15 @@ default:
 	@echo Please use other targets
 
 venv: conda.yaml
-	micromamba env create --file conda.yaml
 	micromamba run -n mit-py311 python3 -mvenv --system-site-packages ./venv
+
+conda-env: conda.yaml
+	micromamba env create --yes --file conda.yaml
 
 run-worker:
 	micromamba run -n mit-py311 celery --app moeflow_worker worker --queues mit --loglevel=debug --concurrency=1
 
-run-streamlit:
+run-streamlit: venv
 	micromamba run -n mit-py311 streamlit run streamlit_main.py
 
 prepare-models:

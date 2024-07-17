@@ -121,6 +121,8 @@ dependencies:
     - py3langid
     - timm
     - streamlit==1.36.0
+    - streamlit-pydantic==0.6.0
+    - pydantic==2.8.2
     - redis
     - manga-ocr
     - pymongo
