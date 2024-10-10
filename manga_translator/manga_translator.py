@@ -19,7 +19,8 @@ from typing import List, Tuple, Union
 from aiohttp import web
 from marshmallow import Schema, fields, ValidationError
 
-from manga_translator.utils.threading import Throttler
+from .utils.threading import Throttler
+from .utils.generic import Quadrilateral
 
 from .args import DEFAULT_ARGS, translator_chain
 from .utils import (
@@ -117,7 +118,7 @@ class MangaTranslator():
     def using_gpu(self):
         return self.device.startswith('cuda') or self.device == 'mps'
 
-    async def translate_path(self, path: str, dest: str = None, params: dict = None):
+    async def translate_path(self, path: str, dest: str = None, params: dict[str, Union[int, str]] = None):
         """
         Translates an image or folder (recursively) specified through the path.
         """
@@ -182,6 +183,7 @@ class MangaTranslator():
             else:
                 logger.info(f'Done. Translated {translated_count} image{"" if translated_count == 1 else "s"}')
 
+    # translate a single file, with error handling
     async def translate_file(self, path: str, dest: str, params: dict):
         if not params.get('overwrite') and os.path.exists(dest):
             logger.info(
@@ -219,7 +221,8 @@ class MangaTranslator():
             attempts += 1
         return False
 
-    async def _translate_file(self, path: str, dest: str, ctx: Context):
+    # the hard lifting
+    async def _translate_file(self, path: str, dest: str, ctx: Context) -> bool:
         if path.endswith('.txt'):
             with open(path, 'r') as f:
                 queries = f.read().split('\n')
@@ -269,6 +272,7 @@ class MangaTranslator():
                 return True
         return False
 
+    # translate a single image file
     async def translate(self, image: Image.Image, params: Union[dict, Context] = None) -> Context:
         """
         Translates a PIL image from a manga. Returns dict with result and intermediates of translation.
@@ -352,6 +356,7 @@ class MangaTranslator():
             except:
                 raise Exception(f'Invalid --font-color value: {ctx.font_color}. Use a hex value such as FF0000')
 
+    # do translate
     async def _translate(self, ctx: Context) -> Context:
 
         # -- Colorization
@@ -372,7 +377,7 @@ class MangaTranslator():
 
         ctx.img_rgb, ctx.img_alpha = load_image(ctx.upscaled)
 
-        # -- Detection
+        # -- Detection: populate ctx.textlines with text blocks
         await self._report_progress('detection')
         ctx.textlines, ctx.mask_raw, ctx.mask = await self._run_detection(ctx)
         if self.verbose:
@@ -390,7 +395,7 @@ class MangaTranslator():
                 cv2.polylines(img_bbox_raw, [txtln.pts], True, color=(255, 0, 0), thickness=2)
             cv2.imwrite(self._result_path('bboxes_unfiltered.png'), cv2.cvtColor(img_bbox_raw, cv2.COLOR_RGB2BGR))
 
-        # -- OCR
+        # -- OCR : fill ctx.textlines[number].text
         await self._report_progress('ocr')
         ctx.textlines = await self._run_ocr(ctx)
         
@@ -412,7 +417,7 @@ class MangaTranslator():
             ctx.result = ctx.upscaled
             return await self._revert_upscale(ctx)
         
-        # -- Textline merge
+        # -- Textline merge: text_lines => text_regions
         await self._report_progress('textline_merge')
         ctx.text_regions = await self._run_textline_merge(ctx)
 
@@ -488,7 +493,7 @@ class MangaTranslator():
                                         self.device, self.verbose)
 
     async def _run_ocr(self, ctx: Context):
-        textlines = await dispatch_ocr(ctx.ocr, ctx.img_rgb, ctx.textlines, ctx, self.device, self.verbose)
+        textlines: list[Quadrilateral] = await dispatch_ocr(ctx.ocr, ctx.img_rgb, ctx.textlines, ctx, self.device, self.verbose)
 
         new_textlines = []
         for textline in textlines:
@@ -655,7 +660,7 @@ class MangaTranslator():
             f.write(s)
 
 
-class MangaTranslatorWeb(MangaTranslator):
+class MangaTranslatorWeb(MangaTranslator):  # run as translation microservice
     """
     Translator client that executes tasks on behalf of the webserver in web_main.py.
     """

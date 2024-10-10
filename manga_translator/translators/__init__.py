@@ -5,39 +5,39 @@ from .baidu import BaiduTranslator
 from .deepseek import DeepseekTranslator
 # from .google import GoogleTranslator
 from .youdao import YoudaoTranslator
-from .deepl import DeeplTranslator
+# from .deepl import DeeplTranslator
 from .papago import PapagoTranslator
 from .caiyun import CaiyunTranslator
 from .chatgpt import GPT3Translator, GPT35TurboTranslator, GPT4Translator
-from .nllb import NLLBTranslator, NLLBBigTranslator
-from .sugoi import JparacrawlTranslator, JparacrawlBigTranslator, SugoiTranslator
-from .m2m100 import M2M100Translator, M2M100BigTranslator
-from .mbart50 import MBart50Translator
-from .selective import SelectiveOfflineTranslator, prepare as prepare_selective_translator
+# from .nllb import NLLBTranslator, NLLBBigTranslator
+# from .sugoi import JparacrawlTranslator, JparacrawlBigTranslator, SugoiTranslator
+# from .m2m100 import M2M100Translator, M2M100BigTranslator
+# from .mbart50 import MBart50Translator
+# from .selective import SelectiveOfflineTranslator, prepare as prepare_selective_translator
 from .none import NoneTranslator
 from .original import OriginalTranslator
 from .sakura import SakuraTranslator
 from .qwen2 import Qwen2Translator, Qwen2BigTranslator
 
 OFFLINE_TRANSLATORS = {
-    'offline': SelectiveOfflineTranslator,
-    'nllb': NLLBTranslator,
-    'nllb_big': NLLBBigTranslator,
-    'sugoi': SugoiTranslator,
-    'jparacrawl': JparacrawlTranslator,
-    'jparacrawl_big': JparacrawlBigTranslator,
-    'm2m100': M2M100Translator,
-    'm2m100_big': M2M100BigTranslator,
-    'mbart50': MBart50Translator,
-    'qwen2': Qwen2Translator,
-    'qwen2_big': Qwen2BigTranslator,
+    # 'offline': SelectiveOfflineTranslator,
+    # 'nllb': NLLBTranslator,
+    # 'nllb_big': NLLBBigTranslator,
+    # 'sugoi': SugoiTranslator,
+    # 'jparacrawl': JparacrawlTranslator,
+    # 'jparacrawl_big': JparacrawlBigTranslator,
+    # 'm2m100': M2M100Translator,
+    # 'm2m100_big': M2M100BigTranslator,
+    # 'mbart50': MBart50Translator,
+    # 'qwen2': Qwen2Translator,
+    # 'qwen2_big': Qwen2BigTranslator,
 }
 
 TRANSLATORS = {
     # 'google': GoogleTranslator,
     'youdao': YoudaoTranslator,
     'baidu': BaiduTranslator,
-    'deepl': DeeplTranslator,
+    # 'deepl': DeeplTranslator,
     'papago': PapagoTranslator,
     'caiyun': CaiyunTranslator,
     'gpt3': GPT3Translator,
@@ -59,7 +59,7 @@ def get_translator(key: str, *args, **kwargs) -> CommonTranslator:
         translator_cache[key] = translator(*args, **kwargs)
     return translator_cache[key]
 
-prepare_selective_translator(get_translator)
+# prepare_selective_translator(get_translator)
 
 # TODO: Refactor
 class TranslatorChain():
@@ -80,7 +80,7 @@ class TranslatorChain():
                 raise ValueError(f'Invalid choice: %s (choose from %s)' % (lang, ', '.join(map(repr, VALID_LANGUAGES))))
             self.chain.append((trans, lang))
         self.translators, self.langs = list(zip(*self.chain))
-    
+
     def has_offline(self) -> bool:
         """
         Returns True if the chain contains offline translators.
