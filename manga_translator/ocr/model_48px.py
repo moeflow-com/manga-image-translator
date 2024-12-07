@@ -12,6 +12,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from manga_translator.config import OcrConfig
 from .xpos_relative_position import XPOS
 
 # Roformer with Xpos and Local Attention ViT
@@ -63,7 +64,7 @@ class Model48pxOCR(OfflineOCR):
     async def _unload(self):
         del self.model
     
-    async def _infer(self, image: np.ndarray, textlines: List[Quadrilateral], args: dict, verbose: bool = False, ignore_bubble: int = 0) -> List[TextBlock]:
+    async def _infer(self, image: np.ndarray, textlines: List[Quadrilateral], config: OcrConfig, verbose: bool = False, ignore_bubble: int = 0) -> List[TextBlock]:
         text_height = 48
         max_chunk_size = 16
 
@@ -88,6 +89,7 @@ class Model48pxOCR(OfflineOCR):
                 tmp = region_imgs[idx]
                 region[i, :, : W, :]=tmp
                 if verbose:
+                    # FIXME: should use tempdir()
                     os.makedirs('result/ocrs/', exist_ok=True)
                     if quadrilaterals[idx][1] == 'v':
                         cv2.imwrite(f'result/ocrs/{ix}.png', cv2.rotate(cv2.cvtColor(region[i, :, :, :], cv2.COLOR_RGB2BGR), cv2.ROTATE_90_CLOCKWISE))
