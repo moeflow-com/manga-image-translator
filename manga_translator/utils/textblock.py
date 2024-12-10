@@ -46,7 +46,7 @@ class TextBlock(object):
                  texts: List[str] = None,
                  language: str = 'unknown',
                  font_size: float = -1,
-                 angle: int = 0,
+                 angle: float = 0,
                  translation: str = "",
                  fg_color: Tuple[float] = (0, 0, 0),
                  bg_color: Tuple[float] = (0, 0, 0),
@@ -83,7 +83,7 @@ class TextBlock(object):
         if self.text and len(texts) > 1:
             for txt in texts[1:]:
                 first_cjk = '\u3000' <= self.text[-1] <= '\u9fff'
-                second_cjk = '\u3000' <= txt[0] <= '\u9fff'
+                second_cjk = txt and ('\u3000' <= txt[0] <= '\u9fff')
                 if first_cjk or second_cjk :
                     self.text += txt
                 else :
