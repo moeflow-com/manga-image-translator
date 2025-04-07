@@ -40,8 +40,11 @@ share/python-wheels/
 *.egg
 MANIFEST
 .history
+.conda_env_created
+.gradio
 /venv
 
 # Input and Output
 /input/
 /input-translated/
+/storage
