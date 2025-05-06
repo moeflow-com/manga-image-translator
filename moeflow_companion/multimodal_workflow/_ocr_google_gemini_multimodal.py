@@ -8,6 +8,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+logger.setLevel(logging.INFO)
+
+
 class TextRange(BaseModel):
     left: float = Field(description="left X of text")
     top: float = Field(description="top Y of text")
@@ -63,4 +66,6 @@ Your instructions are as follows:
         user_messages=[image_file, prompt], res_model=ImageProcessResult, client=client
     )
     logger.info("processed image %s", image_file)
+    for i, item in enumerate(response.items):
+        logger.info("item %d: %s", i, item)
     return response

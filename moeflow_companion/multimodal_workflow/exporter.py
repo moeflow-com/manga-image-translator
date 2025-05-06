@@ -52,8 +52,10 @@ def _convert_files(
                         # gemini gives coordinates in scaled 1000x1000 image
                         # and moeflow expects normalized [0, 1] coordinates
                         # ref: https://cloud.google.com/gen-ai/docs/gemini/ocr#ocr-parameters
-                        center_x=(block.left + block.right) / 2.0 / 1000.0,
-                        center_y=(block.top + block.bottom) / 2.0 / 1000.0,
+                        center_x=(block.left + block.right) / 2.0 / 1000.0 * image_w,
+                        center_y=(block.top + block.bottom) / 2.0 / 1000.0 * image_h,
+                        normalized_center_x=(block.left + block.right) / 2.0 / 1000.0,
+                        normalized_center_y=(block.top + block.bottom) / 2.0 / 1000.0,
                     )
                     for block in result.items
                 ],
