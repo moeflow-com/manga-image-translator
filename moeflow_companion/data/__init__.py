@@ -1,7 +1,7 @@
 """_summary_"""
 
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, field_validator
 import zipfile
 import logging
 
@@ -21,10 +21,17 @@ class MoeflowProjectMeta(BaseModel):
 
 
 class MoeflowTextBlock(BaseModel):
-    center_x: float | int
-    center_y: float | int
+    center_x: float
+    center_y: float
     source: str | None
     translated: str | None
+
+    @field_validator("center_x", "center_y", mode="after")
+    @classmethod
+    def validate_center(cls, v: float) -> float:
+        if not isinstance(v, (int, float)):
+            raise ValueError("center_y must be a number")
+        return v
 
 
 class MoeflowFile(BaseModel):
