@@ -28,9 +28,11 @@ class MoeflowTextBlock(BaseModel):
 
     @field_validator("center_x", "center_y", mode="after")
     @classmethod
-    def validate_center(cls, v: float) -> float:
+    def validate_normalized_coord(cls, v: float) -> float:
         if not isinstance(v, (int, float)):
-            raise ValueError("center_y must be a number")
+            raise ValueError("must be a number")
+        if not (0 <= v <= 1):
+            raise ValueError("must be between 0 and 1")
         return v
 
 
