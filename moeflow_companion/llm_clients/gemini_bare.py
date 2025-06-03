@@ -15,12 +15,12 @@ ModelClass = TypeVar("ModelClass", bound=BaseModel)
 class GcpGeminiBare(StrEnum):
     # list of models (Gemini) : https://ai.google.dev/gemini-api/docs/models
     # list of models (Vertex AI):
-    gemini25_pro = "gemini-2.5-pro-exp-03-25"
-    gemini25_flash = "gemini-2.5-flash-preview-04-17"
+    gemini25_pro = "gemini-2.5-pro-preview-05-06"
+    gemini25_flash = "gemini-2.5-flash-preview-05-20"
     gemini20_flash = "gemini-2.0-flash"
     gemini20_flash_lite = "gemini-2.0-flash-lite"
-    gemini15_flash = "gemini-1.5-flash"
-    gemini15_flash_8b = "gemini-1.5-flash-8b"
+    # gemini15_flash = "gemini-1.5-flash"
+    # gemini15_flash_8b = "gemini-1.5-flash-8b"
 
     @classmethod
     def upload_file(
