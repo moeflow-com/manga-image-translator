@@ -77,6 +77,7 @@ Your instructions are as follows:
     async with contextlib.AsyncExitStack() as stack:
         for s in semaphores:
             await stack.enter_async_context(s)
+        logger.info("processing image %s", image_file)
 
         response = await model.complete_with_json_async(
             user_messages=[image_file, prompt],
