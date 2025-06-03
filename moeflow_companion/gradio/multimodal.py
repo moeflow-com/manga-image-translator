@@ -65,7 +65,7 @@ with gr.Blocks() as multimodal_workflow_block:
         target_language: str | None,
         export_moeflow_project_name: str | None,
     ) -> tuple[str, str | None]:
-        processed = process_images(
+        processed = await process_images(
             image_files=[Path(f) for f in gradio_temp_files],
             target_lang=target_language,
             model=model,

@@ -75,6 +75,30 @@ class GcpGeminiBare(StrEnum):
         )
         return res_model.model_validate_json(response.text)
 
+    async def complete_with_json_async(
+        self,
+        *,
+        user_messages: list[str | genai_types.File | Path],
+        res_model: type[ModelClass],
+        client: genai.Client | None = None,
+        # *,
+        # **kwargs,
+    ) -> ModelClass:
+        if not client:
+            client = get_gemini_client()
+
+        contents: list[genai_types.Part] = _build_parts(user_messages)
+
+        response = await client.aio.models.generate_content(
+            model=self.value,
+            config=genai_types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=res_model,
+            ),
+            contents=contents,
+        )
+        return res_model.model_validate_json(response.text)
+
 
 @functools.lru_cache(maxsize=1)
 def get_gemini_client() -> genai.Client:
