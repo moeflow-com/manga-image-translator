@@ -1,6 +1,7 @@
 from enum import StrEnum
 import functools
 import os
+import magic
 from pathlib import Path
 from google import genai
 from google.genai import types as genai_types
@@ -123,6 +124,8 @@ def _build_parts(
         if isinstance(s, Path):
             file_bytes = s.read_bytes()
             mime_type = mimetypes.guess_type(s)[0]
+            if not mime_type:
+                mime_type = magic.from_buffer(file_bytes, mime=True)
             contents.append(
                 genai_types.Part.from_bytes(data=file_bytes, mime_type=mime_type)
             )

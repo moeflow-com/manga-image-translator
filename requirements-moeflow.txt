@@ -65,3 +65,4 @@ pipdeptree
 gradio==5.32.1
 orjson==3.10.18
 freetype-py
+python-magic
