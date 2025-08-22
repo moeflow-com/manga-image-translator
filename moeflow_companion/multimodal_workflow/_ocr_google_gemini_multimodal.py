@@ -62,7 +62,7 @@ async def _process_single_image(
     target_lang: str,
     client: genai.Client,
     model: gemini_bare.GcpGeminiBare,
-    semaphores: Iterable[contextlib.AbstractContextManager] = (),
+    semaphores: Iterable[contextlib.AbstractAsyncContextManager] = (),
 ) -> ImageProcessResult:
     prompt = f"""
 Please extract text from the attached manga page. Also, translate it into {target_lang}.
