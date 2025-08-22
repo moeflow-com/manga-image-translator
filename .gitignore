@@ -41,12 +41,15 @@ share/python-wheels/
 *.egg
 MANIFEST
 .history
+.conda_env_created
+.gradio
 /venv
 .venv/
 
 # Input and Output
 /input/
 /input-translated/
+/storage
 
 # SSL Used for running server locally
 cert.pem

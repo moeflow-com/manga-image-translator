@@ -3,25 +3,25 @@ from typing import Optional, List
 import py3langid as langid
 
 from .common import *
-from .baidu import BaiduTranslator
+# from .baidu import BaiduTranslator
 from .deepseek import DeepseekTranslator
 # from .google import GoogleTranslator
-from .youdao import YoudaoTranslator
-from .deepl import DeeplTranslator
-from .papago import PapagoTranslator
-from .caiyun import CaiyunTranslator
+# from .youdao import YoudaoTranslator
+# from .deepl import DeeplTranslator
+# from .papago import PapagoTranslator
+# from .caiyun import CaiyunTranslator
 from .chatgpt import OpenAITranslator
-from .chatgpt_2stage import ChatGPT2StageTranslator
-from .nllb import NLLBTranslator, NLLBBigTranslator
-from .sugoi import JparacrawlTranslator, JparacrawlBigTranslator, SugoiTranslator
-from .m2m100 import M2M100Translator, M2M100BigTranslator
-from .mbart50 import MBart50Translator
-from .selective import SelectiveOfflineTranslator, prepare as prepare_selective_translator
+# from .chatgpt_2stage import ChatGPT2StageTranslator
+# from .nllb import NLLBTranslator, NLLBBigTranslator
+# from .sugoi import JparacrawlTranslator, JparacrawlBigTranslator, SugoiTranslator
+# from .m2m100 import M2M100Translator, M2M100BigTranslator
+# from .mbart50 import MBart50Translator
+# from .selective import SelectiveOfflineTranslator, prepare as prepare_selective_translator
 from .none import NoneTranslator
 from .original import OriginalTranslator
-from .sakura import SakuraTranslator
-from .qwen2 import Qwen2Translator, Qwen2BigTranslator
-from .groq import GroqTranslator
+# from .sakura import SakuraTranslator
+# from .qwen2 import Qwen2Translator, Qwen2BigTranslator
+# from .groq import GroqTranslator
 from .gemini import GeminiTranslator
 from .gemini_2stage import Gemini2StageTranslator
 from .custom_openai import CustomOpenAiTranslator
@@ -29,24 +29,24 @@ from ..config import Translator, TranslatorConfig, TranslatorChain
 from ..utils import Context
 
 OFFLINE_TRANSLATORS = {
-    Translator.offline: SelectiveOfflineTranslator,
-    Translator.nllb: NLLBTranslator,
-    Translator.nllb_big: NLLBBigTranslator,
-    Translator.sugoi: SugoiTranslator,
-    Translator.jparacrawl: JparacrawlTranslator,
-    Translator.jparacrawl_big: JparacrawlBigTranslator,
-    Translator.m2m100: M2M100Translator,
-    Translator.m2m100_big: M2M100BigTranslator,
-    Translator.mbart50: MBart50Translator,
-    Translator.qwen2: Qwen2Translator,
-    Translator.qwen2_big: Qwen2BigTranslator,
+    # Translator.offline: SelectiveOfflineTranslator,
+    # Translator.nllb: NLLBTranslator,
+    # Translator.nllb_big: NLLBBigTranslator,
+    # Translator.sugoi: SugoiTranslator,
+    # Translator.jparacrawl: JparacrawlTranslator,
+    # Translator.jparacrawl_big: JparacrawlBigTranslator,
+    # Translator.m2m100: M2M100Translator,
+    # Translator.m2m100_big: M2M100BigTranslator,
+    # Translator.mbart50: MBart50Translator,
+    # Translator.qwen2: Qwen2Translator,
+    # Translator.qwen2_big: Qwen2BigTranslator,
 }
 
 GPT_TRANSLATORS = {
     Translator.chatgpt: OpenAITranslator,
-    Translator.chatgpt_2stage: ChatGPT2StageTranslator,
+    # Translator.chatgpt_2stage: ChatGPT2StageTranslator,
     Translator.deepseek: DeepseekTranslator,
-    Translator.groq:GroqTranslator,
+    # Translator.groq:GroqTranslator,
     Translator.custom_openai: CustomOpenAiTranslator,
     Translator.gemini: GeminiTranslator,
     Translator.gemini_2stage: Gemini2StageTranslator,
@@ -55,14 +55,14 @@ GPT_TRANSLATORS = {
 
 TRANSLATORS = {
     # 'google': GoogleTranslator,
-    Translator.youdao: YoudaoTranslator,
-    Translator.baidu: BaiduTranslator,
-    Translator.deepl: DeeplTranslator,
-    Translator.papago: PapagoTranslator,
-    Translator.caiyun: CaiyunTranslator,
+    # Translator.youdao: YoudaoTranslator,
+    # Translator.baidu: BaiduTranslator,
+    # Translator.deepl: DeeplTranslator,
+    # Translator.papago: PapagoTranslator,
+    # Translator.caiyun: CaiyunTranslator,
     Translator.none: NoneTranslator,
     Translator.original: OriginalTranslator,
-    Translator.sakura: SakuraTranslator,
+    # Translator.sakura: SakuraTranslator,
     **GPT_TRANSLATORS,
     **OFFLINE_TRANSLATORS,
 }
@@ -76,7 +76,7 @@ def get_translator(key: Translator, *args, **kwargs) -> CommonTranslator:
         translator_cache[key] = translator(*args, **kwargs)
     return translator_cache[key]
 
-prepare_selective_translator(get_translator)
+# prepare_selective_translator(get_translator)
 
 async def prepare(chain: TranslatorChain):
     for key, tgt_lang in chain.chain:
