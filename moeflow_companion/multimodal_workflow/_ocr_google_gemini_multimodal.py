@@ -2,7 +2,7 @@ from typing import Iterable
 from google import genai
 from pathlib import Path
 from pydantic import BaseModel, Field
-from ..llm_clients import gemini_bare
+from moeflow_companion.llm_clients import gemini_bare
 import asyncio
 import contextlib
 
@@ -19,17 +19,17 @@ global_semaphore = asyncio.Semaphore(5)
 logger.setLevel(logging.INFO)
 
 
-class TextRange(BaseModel):
+class TextBlock(BaseModel):
     left: float = Field(description="left X of text")
     top: float = Field(description="top Y of text")
     right: float = Field(description="right X of txt")
     bottom: float = Field(description="bottom Y of text")
-    text: str = Field(description="the original text")
-    translated_text: str = Field(description="the translated text")
+    source: str = Field(description="the original text")
+    translated: str = Field(description="the translated text")
 
 
 class ImageProcessResult(BaseModel):
-    items: list[TextRange]
+    text_blocks: list[TextBlock]
 
 
 async def process_images(
@@ -45,13 +45,13 @@ async def process_images(
     return await asyncio.gather(
         *[
             _process_single_image(
-                i,
+                f,
                 target_lang=target_lang,
                 client=gemini_bare.get_gemini_client(),
                 model=model,
                 semaphores=(global_semaphore,),
             )
-            for i in image_files
+            for f in image_files
         ]
     )
 
@@ -85,6 +85,6 @@ Your instructions are as follows:
             client=client,
         )
         logger.info("processed image %s", image_file)
-        for i, item in enumerate(response.items):
+        for i, item in enumerate(response.text_blocks):
             logger.info("item %d: %s", i, item)
         return response

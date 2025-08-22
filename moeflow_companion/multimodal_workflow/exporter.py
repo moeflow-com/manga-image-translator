@@ -1,5 +1,6 @@
 from pathlib import Path
-from ._ocr_google_gemini_multimodal import ImageProcessResult
+from pydantic import BaseModel
+from ._ocr_google_gemini_multimodal import ImageProcessResult, TextBlock
 from moeflow_companion.utils import read_image_dim
 import datetime
 from moeflow_companion.data import (
@@ -32,11 +33,40 @@ def export_moeflow_project(
     return proj.to_zip(dest)
 
 
+class FileProcessResult(BaseModel):
+    local_path: Path
+    image_w: int
+    image_h: int
+    text_blocks: list[TextBlock]
+
+    @staticmethod
+    def from_image_process_result(
+        img_path: Path, result: ImageProcessResult
+    ) -> "FileProcessResult":
+        image_w, image_h = read_image_dim(img_path)
+        return FileProcessResult(
+            local_path=img_path,
+            image_w=image_w,
+            image_h=image_h,
+            text_blocks=[
+                TextBlock(
+                    source=block.source,
+                    translated=block.translated,
+                    left=(block.left) / 1000.0 * image_w,
+                    top=(block.top) / 1000.0 * image_h,
+                    right=(block.right) / 1000.0 * image_w,
+                    bottom=(block.top) / 1000.0 * image_h,
+                )
+                for block in result.text_blocks
+            ]
+        )
+
+
 def _convert_files(
     image_files: list[Path],
     process_result: list[ImageProcessResult],
-) -> MoeflowProject:
-    files = []
+) -> list[MoeflowFile]:
+    files: list[MoeflowFile] = []
     for image_file, result in zip(image_files, process_result):
         image_w, image_h = read_image_dim(image_file)
 
@@ -47,8 +77,8 @@ def _convert_files(
                 image_h=image_h,
                 text_blocks=[
                     MoeflowTextBlock(
-                        source=block.text,
-                        translated=block.translated_text,
+                        source=block.source,
+                        translated=block.translated,
                         # gemini gives coordinates in scaled 1000x1000 image
                         # and moeflow expects normalized [0, 1] coordinates
                         # ref: https://cloud.google.com/gen-ai/docs/gemini/ocr#ocr-parameters
@@ -57,7 +87,7 @@ def _convert_files(
                         normalized_center_x=(block.left + block.right) / 2.0 / 1000.0,
                         normalized_center_y=(block.top + block.bottom) / 2.0 / 1000.0,
                     )
-                    for block in result.items
+                    for block in result.text_blocks
                 ],
             )
         )

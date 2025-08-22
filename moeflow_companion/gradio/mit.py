@@ -66,14 +66,14 @@ with gr.Blocks() as mit_workflow_block:
         ],
         outputs=[ocr_output, file_output],
     )
-    async def on_run_button(
+    async def manga_image_translator_process_files(
         gradio_temp_files: list[str],
         detector_key: str,
         ocr_key: str,
         device: str,
         target_language: str | None,
         export_moeflow_project_name: str | None,
-    ) -> tuple[str, str | None]:
+    ) -> tuple[dict, str | None]:
         res = await process_files(
             gradio_temp_files,
             detector_key=detector_key,

@@ -1,8 +1,8 @@
 from pathlib import Path
 import gradio as gr
 
-from ..llm_clients.gemini_bare import GcpGeminiBare
-from moeflow_companion.multimodal_workflow import process_images, export_moeflow_project
+from moeflow_companion.llm_clients.gemini_bare import GcpGeminiBare
+from moeflow_companion.multimodal_workflow import process_images, export_moeflow_project, FileProcessResult
 from moeflow_companion.utils import create_unique_dir
 import logging
 
@@ -59,18 +59,22 @@ with gr.Blocks() as multimodal_workflow_block:
         ],
         outputs=[ocr_output, file_output],
     )
-    async def on_run_button(
+    async def multimodal_llm_process_files(
         gradio_temp_files: list[str],
         model: str,
-        target_language: str | None,
+        target_language: str,
         export_moeflow_project_name: str | None,
-    ) -> tuple[str, str | None]:
+    ) -> tuple[dict, str | None]:
         processed = await process_images(
             image_files=[Path(f) for f in gradio_temp_files],
             target_lang=target_language,
             model=model,
         )
-        res_obj = [p.model_dump(mode="json") for p in processed]
+        res_obj = {
+            'files': [
+                FileProcessResult.from_image_process_result(img_path=Path(f), result=p).model_dump(mode="json")
+                for f, p in zip(gradio_temp_files, processed)]
+        }
 
         moeflow_zip = export_moeflow_project(
             image_files=[Path(f) for f in gradio_temp_files],
