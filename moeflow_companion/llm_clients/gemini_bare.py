@@ -16,8 +16,9 @@ ModelClass = TypeVar("ModelClass", bound=BaseModel)
 class GcpGeminiBare(StrEnum):
     # list of models (Gemini) : https://ai.google.dev/gemini-api/docs/models
     # list of models (Vertex AI):
-    gemini25_pro = "gemini-2.5-pro-preview-05-06"
-    gemini25_flash = "gemini-2.5-flash-preview-05-20"
+    gemini25_pro = "gemini-2.5-pro"
+    gemini25_flash = "gemini-2.5-flash"
+    gemini25_flash_lite = "gemini-2.5-flash-lite"
     gemini20_flash = "gemini-2.0-flash"
     gemini20_flash_lite = "gemini-2.0-flash-lite"
     # gemini15_flash = "gemini-1.5-flash"

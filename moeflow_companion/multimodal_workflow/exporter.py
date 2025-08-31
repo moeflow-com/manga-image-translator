@@ -58,7 +58,7 @@ class FileProcessResult(BaseModel):
                     bottom=(block.top) / 1000.0 * image_h,
                 )
                 for block in result.text_blocks
-            ]
+            ],
         )
 
 

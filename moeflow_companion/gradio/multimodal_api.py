@@ -4,52 +4,36 @@ import gradio as gr
 from moeflow_companion.llm_clients.gemini_bare import GcpGeminiBare
 from moeflow_companion.multimodal_workflow import (
     process_images,
-    export_moeflow_project,
     FileProcessResult,
 )
-from moeflow_companion.utils import create_unique_dir
 import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-with gr.Blocks() as multimodal_workflow_block:
-    gr.Markdown("# multimodal workflow")
+with gr.Blocks() as multimodal_api_block:
+    gr.Markdown("# multimodal workflow as API")
     file_input = gr.File(
         label="upload file",
         file_count="multiple",
         type="filepath",
     )
 
-    target_language_input = gr.Radio(
-        (
-            "English",
-            "Chinese Simplified",
-            "Chinese Traditional",
-        ),
-        label="Target language",
-        value="Chinese Traditional",
+    target_language_input = gr.Text(
+        label="target language",
+        value="",
     )
 
     model_input = gr.Radio(
-        choices=[
-            # GcpGeminiBare.gemini20_flash_lite,
-            # GcpGeminiBare.gemini20_flash,
+        choices=(
             GcpGeminiBare.gemini25_flash_lite,
             GcpGeminiBare.gemini25_flash,
             GcpGeminiBare.gemini25_pro,
-        ],
+        ),
         label="LLM",
-        value=GcpGeminiBare.gemini25_flash_lite,
-    )
-    export_moeflow_project_name_input = gr.Text(
-        None,
-        label="moeflow project name",
-        placeholder="when empty, project name will be set to first image filename",
+        value=GcpGeminiBare.gemini25_flash,
     )
     run_button = gr.Button("run")
-
-    file_output = gr.File(label="moeflow project zip", type="filepath")
 
     ocr_output = gr.JSON(
         label="process result",
@@ -60,16 +44,14 @@ with gr.Blocks() as multimodal_workflow_block:
             file_input,
             model_input,
             target_language_input,
-            export_moeflow_project_name_input,
         ],
-        outputs=[ocr_output, file_output],
+        outputs=[ocr_output],
     )
-    async def multimodal_llm_process_files(
+    async def multimodal_llm_translate_file_api(
         gradio_temp_files: list[str],
         model: str,
         target_language: str,
-        export_moeflow_project_name: str | None,
-    ) -> tuple[dict, str | None]:
+    ) -> tuple[dict]:
         processed = await process_images(
             image_files=[Path(f) for f in gradio_temp_files],
             target_lang=target_language,
@@ -84,11 +66,4 @@ with gr.Blocks() as multimodal_workflow_block:
             ]
         }
 
-        moeflow_zip = export_moeflow_project(
-            image_files=[Path(f) for f in gradio_temp_files],
-            process_result=processed,
-            project_name=export_moeflow_project_name,
-            dest_dir=create_unique_dir("export"),
-        )
-
-        return res_obj, str(moeflow_zip)
+        return (res_obj,)
