@@ -51,7 +51,7 @@ with gr.Blocks() as multimodal_api_block:
         gradio_temp_files: list[str],
         model: str,
         target_language: str,
-    ) -> tuple[dict]:
+    ) -> dict:
         processed = await process_images(
             image_files=[Path(f) for f in gradio_temp_files],
             target_lang=target_language,
@@ -66,4 +66,4 @@ with gr.Blocks() as multimodal_api_block:
             ]
         }
 
-        return (res_obj,)
+        return res_obj
